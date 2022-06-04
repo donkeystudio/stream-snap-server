@@ -23,7 +23,7 @@ def load_file(file):
 
 
 def serve_on_port(port, command, user, pwd):
-    HTTPHandler.command = command
+    HTTPHandler.os_command = command
     server = HTTPServer(('0.0.0.0', port), HTTPHandler)
     if user is not None and pwd is not None:
         server.set_auth(user, pwd)
@@ -32,7 +32,7 @@ def serve_on_port(port, command, user, pwd):
 
 
 class HTTPHandler(BaseHTTPRequestHandler):
-    command = None
+    os_command = None
 
     def do_AUTHHEAD(self):
         self.send_response(401)
@@ -54,7 +54,7 @@ class HTTPHandler(BaseHTTPRequestHandler):
             self.wfile.write(bytes(json.dumps(response), 'utf-8'))
         elif self.headers.get('Authorization') == 'Basic ' + str(key) or key is None:
             if self.path == '/img':
-                os.system(self.command)
+                os.system(self.os_command)
                 data = load_file(imageName)
                 self.send_response(200)
                 self.send_header('Content-Type', 'image/jpeg')
