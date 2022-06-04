@@ -22,9 +22,8 @@ def load_file(file):
         return file_handler.read()
 
 
-def serve_on_port(port, image, stream, user, pwd):
-    HTTPHandler.imageName = image
-    HTTPHandler.streamLink = stream
+def serve_on_port(port, command, user, pwd):
+    HTTPHandler.command = command
     server = HTTPServer(('0.0.0.0', port), HTTPHandler)
     if user is not None and pwd is not None:
         server.set_auth(user, pwd)
@@ -33,8 +32,7 @@ def serve_on_port(port, image, stream, user, pwd):
 
 
 class HTTPHandler(BaseHTTPRequestHandler):
-    imageName = None
-    streamLink = None
+    command = None
 
     def do_AUTHHEAD(self):
         self.send_response(401)
@@ -56,8 +54,7 @@ class HTTPHandler(BaseHTTPRequestHandler):
             self.wfile.write(bytes(json.dumps(response), 'utf-8'))
         elif self.headers.get('Authorization') == 'Basic ' + str(key) or key is None:
             if self.path == '/img':
-                os.system("ffmpeg -rtsp_transport tcp -err_detect aggressive -fflags discardcorrupt -v fatal -y -i {} "
-                          "-frames:v 4 -r 1 -an -f image2 -update 1 {}".format(self.streamLink, self.imageName))
+                os.system(self.command)
                 data = load_file(imageName)
                 self.send_response(200)
                 self.send_header('Content-Type', 'image/jpeg')
@@ -76,6 +73,7 @@ parser = ArgumentParser(formatter_class=ArgumentDefaultsHelpFormatter)
 parser.add_argument("-u", "--user", default=None, help="Username")
 parser.add_argument("-pwd", "--password", default=None, help="Password")
 parser.add_argument("-p", "--port", default=8080, type=int, help="Port")
+parser.add_argument("-f", "--frames", default=4, type=int, help="Number of frames to capture")
 parser.add_argument("stream_url", help="Stream URL")
 args = vars(parser.parse_args())
 
@@ -84,7 +82,10 @@ USER = args["user"]
 PWD = args["password"]
 imageName = "snap.jpg"
 streamLink = args["stream_url"]
+frames = args["frames"]
 
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
-    serve_on_port(PORT, imageName, streamLink, USER, PWD)
+    ffmpeg_command = "ffmpeg -rtsp_transport tcp -err_detect aggressive -fflags discardcorrupt -v fatal -y -i {} " \
+                     "-frames:v {} -r 1 -an -f image2 -update 1 {}".format(streamLink, frames, imageName)
+    serve_on_port(PORT, ffmpeg_command, USER, PWD)
