@@ -1,13 +1,22 @@
 # stream-snap-server
 An HTTP server to capture screenshots from a video stream. Basic Authentication is supported. To grab the latest screenshot, default access is `http://localhost:8080/img`
 
+## Usage
+This script is a perfect companion to integrate your DIY security camera to [Homebridge](https://homebridge.io) or [Scrypted](https://github.com/koush/scrypted)
+
 ## Dependencies
 `ffmpeg` is required to load the video stream and capture screenshot.
 
 ## Supported (Tested) streaming protocols
 1. RTSP
 
-## Arguments
+## [Docker](https://hub.docker.com/r/donkeystudio/stream-snap-server)
+Supported architectures: `linux/arm/v7`, `linux/arm64`, `linux/amd64`
+```
+docker run --rm --network=host donkeystudio/stream-snap-server
+```
+
+## Startup Configuration
 ```
 python3 main.py --help
 ```
