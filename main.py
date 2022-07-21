@@ -2,11 +2,11 @@ import base64
 import json
 import os
 from http.server import BaseHTTPRequestHandler
-from socketserver import TCPServer
+from socketserver import TCPServer, ThreadingMixIn
 from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
 
 
-class HTTPServer(TCPServer):
+class HTTPServer(ThreadingMixIn, TCPServer):
     daemon_threads = True
     key = None
 
